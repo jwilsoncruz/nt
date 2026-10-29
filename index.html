@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Noche de Talentos · Control de escenario</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎤</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#14081f;--bg2:#1f0f31;--red:#c4143a;--gold:#f6bd4a;--cream:#fff3d6;--teal:#2fd1c1;--mut:#b9a9cc;--line:rgba(255,243,214,.14);
+--disp:"Bowlby One","Arial Black",Impact,sans-serif;--body:"DM Sans",system-ui,-apple-system,Segoe UI,sans-serif}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--cream);font:16px/1.45 var(--body)}
+button,input,textarea{font:inherit;color:inherit}
+.view{display:none;min-height:100%}
+.view.on{display:block}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* ---------- Inicio ---------- */
+#v-home{display:none;place-items:center;text-align:center;padding:32px;background:radial-gradient(ellipse at 50% -10%,#5a1a55 0,transparent 60%),var(--bg)}
+#v-home.on{display:grid}
+#v-home h1{font:400 clamp(40px,8vw,96px)/.95 var(--disp);color:var(--gold);text-shadow:0 4px 0 var(--red)}
+#v-home p{color:var(--mut);margin:18px 0 34px}
+.choose{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+.choose a{display:block;width:260px;padding:26px 20px;border:2px solid var(--gold);border-radius:6px;color:var(--cream);text-decoration:none;background:rgba(255,255,255,.04);transition:.15s}
+.choose a:hover{background:var(--gold);color:var(--bg);transform:translateY(-3px)}
+.choose b{display:block;font:400 26px var(--disp);margin-bottom:6px}
+
+/* ---------- Admin ---------- */
+#v-admin{background:var(--bg2)}
+.top{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:14px 22px;background:var(--bg);border-bottom:2px solid var(--red);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.top h2{font:400 24px var(--disp);color:var(--gold)}
+.wrap{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:20px;padding:20px;max-width:1500px;margin:auto}
+@media(max-width:980px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:20px}
+.card h3{font:400 18px var(--disp);color:var(--gold);margin-bottom:12px}
+.btn{border:0;border-radius:6px;padding:10px 14px;font-weight:700;cursor:pointer;background:rgba(255,243,214,.12);transition:.12s}
+.btn:hover{background:rgba(255,243,214,.24)}
+.btn.gold{background:var(--gold);color:var(--bg)}
+.btn.red{background:var(--red)}
+.btn.teal{background:var(--teal);color:var(--bg)}
+.btn.sm{padding:6px 9px;font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=text],input[type=number],input[type=url],input[type=time],textarea{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
+textarea{min-height:110px;resize:vertical}
+label{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}
+.live{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+#aTime{font:400 64px/1 var(--disp);min-width:210px;font-variant-numeric:tabular-nums}
+#aTime.warn{color:var(--gold)}#aTime.crit{color:#ff5c7a}#aTime.over{color:#ff5c7a;animation:bl .8s steps(2) infinite}
+#aWho small{display:block;color:var(--mut);font-size:13px}
+#aWho b{font-size:22px}
+.plist{list-style:none;padding:0}
+.p{display:grid;grid-template-columns:34px 1.2fr 1.2fr 64px auto;gap:8px;align-items:center;padding:8px;border-radius:8px;border:1px solid transparent}
+.p.cur{border-color:var(--gold);background:rgba(246,189,74,.08)}
+.p.done{opacity:.45}
+.p .n{font:400 20px var(--disp);color:var(--gold);text-align:center}
+@media(max-width:700px){.p{grid-template-columns:30px 1fr 1fr;}.p .acts{grid-column:1/-1}}
+.acts{display:flex;gap:4px;justify-content:flex-end}
+.tag{font-size:11px;padding:2px 7px;border-radius:99px;background:var(--teal);color:var(--bg);font-weight:700}
+.tag.skip{background:var(--mut)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.thumbs div{width:74px;height:50px;border-radius:5px;background-size:cover;background-position:center;position:relative;border:1px solid var(--line)}
+.thumbs button{position:absolute;top:-6px;right:-6px;border:0;border-radius:50%;width:20px;height:20px;background:var(--red);cursor:pointer;line-height:1}
+.hint{font-size:13px;color:var(--mut);margin-top:8px}
+.chk{display:flex;gap:8px;align-items:center;margin-top:12px;color:var(--cream);font-size:15px}
+.chk input{width:18px;height:18px;accent-color:var(--gold)}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--gold);color:var(--bg);padding:10px 18px;border-radius:8px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:99}
+#toast.on{opacity:1}
+@keyframes bl{50%{opacity:.35}}
+
+/* ---------- Pantalla ---------- */
+#v-screen{position:fixed;inset:0;overflow:hidden;background:#000;cursor:none}
+.bgl{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease;transform:scale(1)}
+.bgl.on{opacity:1;animation:kb 14s ease-out forwards}
+@keyframes kb{to{transform:scale(1.12)}}
+.shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,4,20,.74) 0,rgba(12,4,20,.18) 55%,rgba(12,4,20,.6) 100%),linear-gradient(0deg,rgba(12,4,20,.55) 0,transparent 30%)}
+.beam{position:absolute;top:-20%;left:8%;width:55vw;height:140%;background:conic-gradient(from 180deg at 50% 0,transparent 160deg,rgba(255,243,214,.10) 176deg,rgba(255,243,214,.10) 184deg,transparent 200deg);transform-origin:50% 0;animation:sw 9s ease-in-out infinite alternate;pointer-events:none}
+@keyframes sw{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+.sc{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,27vw,460px);grid-template-rows:auto 1fr auto;padding:2.2vw 3vw 0}
+.sc header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;gap:20px}
+.sc header h1{font:400 clamp(20px,2.6vw,44px) var(--disp);color:var(--gold);letter-spacing:.02em}
+#sClock{font:700 clamp(18px,2.2vw,36px) var(--body);font-variant-numeric:tabular-nums;color:var(--cream)}
+.stage{align-self:center;padding-right:3vw;text-shadow:0 2px 16px rgba(0,0,0,.65)}
+#sKick{display:inline-block;background:var(--red);padding:.4vw 1.4vw;border-radius:99px;font:700 clamp(14px,1.7vw,28px) var(--body);margin-bottom:1.6vw}
+#sName{font:400 clamp(44px,8.4vw,150px)/.95 var(--disp);text-shadow:0 .06em 0 var(--red);overflow-wrap:anywhere}
+#sAct{font:500 clamp(20px,2.6vw,46px) var(--body);color:var(--gold);margin:1vw 0 2vw}
+#sTime{font:400 clamp(80px,17vw,300px)/.9 var(--disp);font-variant-numeric:tabular-nums;transition:color .4s}
+#sTime.ok{color:var(--cream)}#sTime.warn{color:var(--gold)}#sTime.crit{color:#ff4d6d}#sTime.over{color:#ff4d6d;animation:bl .7s steps(2) infinite}
+.bar{height:1.1vw;min-height:8px;background:rgba(255,255,255,.14);border-radius:99px;overflow:hidden;margin-top:1.4vw;max-width:62vw}
+#sBar{height:100%;width:100%;background:var(--teal);transition:width .25s linear,background .4s}
+.pre #sBar{background:var(--gold)}
+aside{align-self:center;background:rgba(12,4,20,.62);border:1px solid var(--line);border-radius:14px;padding:1.2vw;backdrop-filter:blur(8px);max-height:74vh;overflow:hidden}
+aside h2{font:400 clamp(14px,1.5vw,24px) var(--disp);color:var(--gold);margin-bottom:.8vw}
+#sList{list-style:none;padding:0;display:flex;flex-direction:column;gap:.45vw}
+#sList li{display:grid;grid-template-columns:2.6vw minmax(0,1fr) auto;gap:.8vw;align-items:center;padding:.5vw .7vw;border-radius:8px;font-size:clamp(13px,1.35vw,24px)}
+#sList li b{font:400 1.3em var(--disp);color:var(--gold);text-align:center}
+#sList li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sList li small{color:var(--mut);font-size:.8em}
+#sList li.cur{background:var(--gold);color:var(--bg)}#sList li.cur b,#sList li.cur small{color:var(--bg)}
+#sList li.nxt{outline:2px dashed var(--gold)}
+#sList li.done{opacity:.35;text-decoration:line-through}
+.news{grid-column:1/-1;margin:0 -3vw;background:var(--red);border-top:3px solid var(--gold);display:flex;align-items:center;height:clamp(40px,5.2vw,84px);overflow:hidden}
+.news em{font:400 clamp(14px,1.7vw,28px) var(--disp);font-style:normal;background:var(--gold);color:var(--bg);padding:0 1.6vw;height:100%;display:flex;align-items:center;white-space:nowrap;z-index:1}
+.track{display:flex;white-space:nowrap;animation:mq 40s linear infinite;font:700 clamp(16px,2vw,34px) var(--body)}
+.track span{padding:0 2vw}
+@keyframes mq{to{transform:translateX(-50%)}}
+.fin{text-align:center}
+.fin #sName{font-size:clamp(40px,7vw,120px)}
+.pubw{max-width:620px;margin:auto;padding:18px;text-align:center}
+#pTitle{font:400 clamp(26px,7vw,40px)/1 var(--disp);color:var(--gold);text-shadow:0 3px 0 var(--red)}
+.now{background:var(--bg2);border:2px solid var(--gold);border-radius:14px;padding:20px 14px;margin:16px 0 10px}
+#pKick{color:var(--mut);font-weight:700}
+#pName{font:400 clamp(30px,9vw,52px)/1 var(--disp);margin:8px 0;overflow-wrap:anywhere}
+#pAct{color:var(--gold);font-size:19px}
+#pTime{font:400 clamp(56px,18vw,96px)/1 var(--disp);font-variant-numeric:tabular-nums;margin-top:8px}
+#pTime.warn{color:var(--gold)}#pTime.crit,#pTime.over{color:#ff5c7a}
+#pNext{color:var(--mut);min-height:24px;margin-bottom:12px}
+#pList{list-style:none;padding:0;text-align:left;display:grid;gap:6px;margin-bottom:14px}
+#pList li{display:flex;gap:12px;padding:9px 12px;border-radius:8px;background:rgba(255,255,255,.06)}
+#pList li b{font:400 18px var(--disp);color:var(--gold);min-width:24px}
+#pList li small{color:var(--mut);margin-left:auto}
+#pList li.cur{background:var(--gold);color:var(--bg)}#pList li.cur b,#pList li.cur small{color:var(--bg)}
+#pList li.done{opacity:.4;text-decoration:line-through}
+#pNews{background:var(--red);border-radius:8px;padding:12px 14px;font-weight:700}
+.hl{display:flex;align-items:center;gap:1.4vw;min-width:0}
+#sLogo{max-height:clamp(34px,4.6vw,80px);max-width:18vw;object-fit:contain}
+#fx{position:absolute;inset:0;width:100%;height:100%;z-index:50;pointer-events:none}
+#sClap{position:absolute;left:0;right:0;top:12%;text-align:center;font:400 clamp(36px,7vw,120px)/1 var(--disp);color:var(--gold);text-shadow:0 .05em 0 var(--red);z-index:45;opacity:0;transform:scale(.6);transition:.35s;pointer-events:none;padding:0 4vw}
+#sClap.on{opacity:1;transform:scale(1)}
+#sMsg{position:absolute;inset:0;z-index:40;display:none;place-items:center;text-align:center;padding:6vw;background:rgba(196,20,58,.95);font:400 clamp(36px,7vw,130px)/1.05 var(--disp);animation:pop .4s}
+#sMsg.on{display:grid}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+#sBlack{position:absolute;inset:0;z-index:60;background:#000;display:none}
+#sBlack.on{display:block}
+#sSnd{position:absolute;right:1.2vw;top:5.5vw;z-index:35;font-size:13px;color:var(--mut);background:rgba(0,0,0,.5);padding:4px 10px;border-radius:99px;display:none}
+#sQr{margin-top:1vw;text-align:center;color:var(--mut);font-size:clamp(11px,1vw,16px)}
+#sQrBox{display:inline-block;background:#fff3d6;padding:6px;border-radius:6px;line-height:0;max-width:100%;overflow:hidden}
+#sQr small{display:block;margin-top:4px}
+@media(prefers-reduced-motion:reduce){.beam,.bgl.on,.track{animation:none}}
+@media(max-width:800px){.sc{grid-template-columns:1fr}aside{display:none}.stage{padding:0}}
+</style>
+</head>
+<body>
+
+<!-- INICIO -->
+<div class="view" id="v-home">
+  <div>
+    <h1>Noche de<br>Talentos</h1>
+    <p>Control de escenario: orden, turnos, tiempos y pantalla gigante.</p>
+    <div class="choose">
+      <a href="#admin"><b>Modo Admin</b>Organiza y dirige el show</a>
+      <a href="#screen"><b>Modo Pantalla</b>Para el proyector o TV</a>
+      <a href="#publico"><b>Modo Público</b>Para celulares y pantalla del lobby</a>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="view" id="v-admin">
+  <div class="top">
+    <h2>🎤 Control de escenario</h2>
+    <div class="row">
+      <button class="btn gold" id="openScreen">Abrir pantalla</button>
+      <button class="btn" id="openPub">Abrir público</button>
+      <button class="btn" id="exp">Exportar</button>
+      <button class="btn" id="imp">Importar</button>
+      <button class="btn red" id="reset">Reiniciar show</button>
+      <input type="file" id="impFile" accept="application/json" hidden>
+    </div>
+  </div>
+  <div id="warn" style="display:none;background:#7a1f1f;padding:10px 22px;font-weight:700">⚠ El navegador bloqueó el almacenamiento (o está lleno): los cambios no llegan a la pantalla y se pierden al recargar. Abre la app desde tu enlace de GitHub Pages o con doble clic en Chrome, y usa menos fotos.</div>
+  <div class="wrap">
+    <div>
+      <div class="card">
+        <h3>Ahora en escena</h3>
+        <div class="live"><div id="aTime">00:00</div><div id="aWho"></div></div>
+        <div class="row">
+          <button class="btn gold" data-a="preview">① Previa</button>
+          <button class="btn teal" data-a="live">② ¡En vivo!</button>
+          <button class="btn" data-a="pause">⏯ Pausa</button>
+          <button class="btn" data-a="m30">−30 s</button>
+          <button class="btn" data-a="p30">+30 s</button>
+          <button class="btn red" data-a="done">✔ Terminar y siguiente</button>
+          <button class="btn" data-a="skip">Saltar</button>
+          <button class="btn" data-a="clap" data-opt="confetti">👏 Aplauso</button>
+          <button class="btn" data-a="black" data-opt="black">⬛ Pantalla negra</button>
+        </div>
+        <p class="hint">La pantalla se actualiza sola. Con “automático” activo, la previa pasa a en vivo al llegar a cero.</p>
+      </div>
+      <div class="card">
+        <h3>Orden de participación</h3>
+        <ul class="plist" id="aList"></ul>
+        <div class="row" style="margin-top:14px">
+          <input type="text" id="nName" placeholder="Nombre o grupo" style="flex:2;min-width:140px">
+          <input type="text" id="nAct" placeholder="Talento (canto, baile…)" style="flex:2;min-width:140px">
+          <input type="number" id="nDur" value="4" min="1" max="30" style="width:80px" title="Minutos">
+          <button class="btn gold" id="addP">Agregar</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>Inicio del show</h3>
+        <div class="row"><input type="time" id="stTime" style="width:150px" aria-label="Hora de inicio"><button class="btn gold" id="stSet">Programar hora</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn" data-in="1">En 1 min</button><button class="btn" data-in="5">En 5 min</button><button class="btn" data-in="10">En 10 min</button><button class="btn red" id="stOff">Quitar</button></div>
+        <p class="hint" id="stInfo"></p>
+      </div>
+      <div class="card">
+        <h3>Ajustes</h3>
+        <label for="cTitle">Título del evento</label><input type="text" id="cTitle">
+        <label for="cPrev">Segundos de previa</label><input type="number" id="cPrev" min="3" max="120">
+        <label for="cSlide">Segundos por imagen de fondo</label><input type="number" id="cSlide" min="3" max="60">
+        <label class="chk"><input type="checkbox" id="cAuto"> Automático: previa → en vivo</label>
+      </div>
+      <div class="card">
+        <h3>Extras (activar / desactivar)</h3>
+        <div id="optBox"></div>
+        <p class="hint">Atajos de teclado: Espacio pausa · P previa · L en vivo · N terminar y siguiente · S saltar · B pantalla negra · R receso. El sonido suena en la pantalla grande: haz un clic en ella una vez para activar el audio.</p>
+      </div>
+      <div class="card" data-opt="recess">
+        <h3>Receso</h3>
+        <div class="row"><input type="number" id="brMin" value="10" min="1" max="60" style="width:90px" title="Minutos"><button class="btn gold" id="brOn">Iniciar receso</button><button class="btn red" id="brOff">Terminar</button></div>
+        <p class="hint" id="brInfo"></p>
+      </div>
+      <div class="card" data-opt="msg">
+        <h3>Mensaje instantáneo</h3>
+        <input type="text" id="mText" placeholder="Ej: Hay un auto con las luces encendidas">
+        <div class="row" style="margin-top:8px"><input type="number" id="mSec" value="8" min="3" max="60" style="width:90px" title="Segundos en pantalla"><button class="btn gold" id="mGo">Lanzar</button><button class="btn red" id="mOff">Quitar</button></div>
+      </div>
+      <div class="card" data-opt="logo">
+        <h3>Logo / patrocinadores</h3>
+        <div class="row"><input type="url" id="lgUrl" placeholder="fondos/logo.png o https://…" style="flex:1"><button class="btn gold" id="lgSet">Usar</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn" id="lgUp">Subir imagen</button><button class="btn red" id="lgOff">Quitar</button><input type="file" id="lgFile" accept="image/*" hidden></div>
+        <p class="hint">Una sola imagen: si tienes varios patrocinadores, únelos en un banner.</p>
+      </div>
+      <div class="card">
+        <h3>Marquesina de noticias</h3>
+        <textarea id="cTick" placeholder="Un mensaje por línea"></textarea>
+        <p class="hint">Un mensaje por línea. Salen en bucle abajo en la pantalla.</p>
+      </div>
+      <div class="card">
+        <h3>Imágenes de fondo</h3>
+        <div class="row"><input type="url" id="imgUrl" placeholder="https://…/foto.jpg" style="flex:1"><button class="btn gold" id="addUrl">Añadir</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn" id="upBtn">Subir fotos</button><input type="file" id="upFile" accept="image/*" multiple hidden></div>
+        <div class="thumbs" id="thumbs"></div>
+        <p class="hint">Sin imágenes se usan fondos de escenario con degradados. Tip: sube tus fotos al repositorio (carpeta fondos/) y pega la ruta, ej. fondos/foto1.jpg. Los enlaces de Google, Facebook o Instagram no funcionan.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PANTALLA -->
+<div class="view" id="v-screen">
+  <div id="bg"><div class="bgl"></div><div class="bgl"></div></div>
+  <div class="shade"></div><div class="beam"></div>
+  <canvas id="fx"></canvas><div id="sClap"></div><div id="sMsg"></div><div id="sBlack"></div><div id="sSnd">🔊 Haz clic para activar el sonido</div>
+  <div class="sc" id="sc">
+    <header><div class="hl"><img id="sLogo" alt="" hidden><h1 id="sTitle"></h1></div><div id="sClock"></div></header>
+    <div class="stage">
+      <div id="sKick"></div>
+      <div id="sName"></div>
+      <div id="sAct"></div>
+      <div id="sTime" class="ok"></div>
+      <div class="bar"><div id="sBar"></div></div>
+    </div>
+    <aside><h2>Orden del show</h2><ol id="sList"></ol><div id="sQr" hidden><div id="sQrBox"></div><small>Escanea para ver el show</small></div></aside>
+    <div class="news"><em>ÚLTIMA HORA</em><div style="overflow:hidden;flex:1"><div class="track" id="sTrack"></div></div></div>
+  </div>
+</div>
+
+<!-- PÚBLICO -->
+<div class="view" id="v-publico"><div class="pubw">
+  <img id="pLogo" alt="" hidden style="max-height:60px;max-width:70%;margin-bottom:8px"><h1 id="pTitle"></h1>
+  <div class="now"><div id="pKick"></div><div id="pName"></div><div id="pAct"></div><div id="pTime"></div></div>
+  <div id="pNext"></div>
+  <ol id="pList"></ol>
+  <div id="pNews"></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+const KEY='nt_state_v1', $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const bc='BroadcastChannel' in window?new BroadcastChannel('nt_sync'):null;
+const DEF={title:'Noche de Talentos',cur:0,phase:'idle',start:0,dur:0,paused:false,left:0,previewSec:15,auto:true,slideSec:8,showAt:0,showTotal:0,brkAt:0,brkTotal:0,black:false,logo:'',msg:{text:'',until:0},fx:{t:0,who:''},opt:{sound:true,keys:true,confetti:true,recess:true,msg:true,black:true,logo:true,qr:false},
+ participants:[
+  {id:1,name:'Ana Lucía',act:'Canto · Balada',dur:4},
+  {id:2,name:'Los Tigres del Barrio',act:'Baile urbano',dur:5},
+  {id:3,name:'Mateo el Mago',act:'Magia con cartas',dur:4},
+  {id:4,name:'Carla y Dani',act:'Dueto de guitarra',dur:4},
+  {id:5,name:'Profe Ramiro',act:'Stand-up comedy',dur:3}],
+ ticker:['¡Bienvenidos a la Noche de Talentos!','Apaguen sus celulares y préndanse con los aplausos','Cada talento merece un fuerte aplauso','El refrigerio está disponible en el patio'],
+ images:[]};
+const GRADS=[
+ 'radial-gradient(ellipse at 30% 20%,#7a1f6d,transparent 55%),linear-gradient(160deg,#2a0b3f,#0f0418)',
+ 'radial-gradient(ellipse at 75% 30%,#c4143a,transparent 55%),linear-gradient(200deg,#3b0a2b,#12040f)',
+ 'radial-gradient(ellipse at 50% 80%,#e49a1e,transparent 50%),linear-gradient(180deg,#1d0a33,#0b0314)',
+ 'radial-gradient(ellipse at 20% 70%,#1fa89b,transparent 50%),linear-gradient(140deg,#16092b,#07020f)'];
+let S=load();
+let MEM=null;
+function load(){let o;try{o=Object.assign({},DEF,JSON.parse((MEM!==null?MEM:localStorage.getItem(KEY))||'{}'))}catch(e){o=JSON.parse(JSON.stringify(DEF))}o.opt=Object.assign({},DEF.opt,o.opt);return o}
+function warn(on){const w=$('#warn');if(w)w.style.display=on?'block':'none'}
+function save(re=true){try{localStorage.setItem(KEY,JSON.stringify(S));MEM=null;warn(false)}catch(e){MEM=JSON.stringify(S);warn(true)}bc&&bc.postMessage(1);if(re)render()}
+function sync(){S=load();render()}
+addEventListener('storage',e=>{if(e.key===KEY)sync()});
+bc&&(bc.onmessage=sync);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)}
+
+/* ---- tiempo ---- */
+const left=()=>S.phase==='idle'?0:(S.paused?S.left:S.dur-(Date.now()-S.start));
+const P=()=>S.participants[S.cur];
+const fmt=ms=>{const o=ms<0,s=Math.ceil(Math.abs(ms)/1000);return (o?'+':'')+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const cls=(ms,ph)=>ph==='idle'?'ok':ms<0?'over':ms<=10000?'crit':ms<=30000?'warn':'ok';
+const allDone=()=>S.participants.length>0&&S.participants.every(p=>p.st);
+const pre0=()=>S.showAt&&S.phase==='idle'&&!S.participants.some(x=>x.st);
+
+/* ---- acciones ---- */
+function begin(ph,d){S.showAt=0;S.brkAt=0;S.phase=ph;S.dur=d;S.start=Date.now();S.paused=false;save()}
+function nextPending(){const n=S.participants.length;for(let k=1;k<=n;k++){const i=(S.cur+k)%n;if(!S.participants[i].st){S.cur=i;return}}}
+const A={
+ preview(){P()&&begin('preview',S.previewSec*1000)},
+ live(){P()&&begin('live',P().dur*60000)},
+ pause(){if(S.phase==='idle')return;if(S.paused){S.start=Date.now()-(S.dur-S.left);S.paused=false}else{S.left=left();S.paused=true}save()},
+ p30(){adj(30000)},m30(){adj(-30000)},
+ done(){if(!P())return;const w=P().name;P().st='done';nextPending();S.phase='idle';S.fx={t:Date.now(),who:w};save()},
+ clap(){S.fx={t:Date.now(),who:P()?P().name:''};save()},
+ black(){S.black=!S.black;save()},
+ brk(){if(S.brkAt>Date.now()){S.brkAt=0}else{S.brkTotal=Math.max(1,+$('#brMin').value||10)*60000;S.brkAt=Date.now()+S.brkTotal}save()},
+ skip(){if(!P())return;P().st='skip';nextPending();S.phase='idle';save()}
+};
+function adj(ms){if(S.phase==='idle')return;if(S.paused)S.left+=ms;else S.dur+=ms;save()}
+
+/* ---- ADMIN ---- */
+function renderAdmin(){
+  $('#aList').innerHTML=S.participants.map((p,i)=>`<li class="p ${i===S.cur?'cur':''} ${p.st?'done':''}" data-i="${i}">
+   <span class="n">${i+1}</span>
+   <input type="text" data-f="name" value="${esc(p.name)}" aria-label="Nombre">
+   <input type="text" data-f="act" value="${esc(p.act)}" aria-label="Talento">
+   <input type="number" data-f="dur" value="${p.dur}" min="1" max="30" aria-label="Minutos">
+   <span class="acts">${p.st?`<span class="tag ${p.st==='skip'?'skip':''}">${p.st==='skip'?'saltó':'listo'}</span><button class="btn sm" data-b="undo" title="Volver a la fila">↺</button>`:''}
+    <button class="btn sm" data-b="go" title="Elegir este turno">▶</button>
+    <button class="btn sm" data-b="up">↑</button><button class="btn sm" data-b="dn">↓</button><button class="btn sm" data-b="del">✕</button></span></li>`).join('')||'<li class="hint">Agrega a tu primer participante abajo.</li>';
+  const c=$('#cTitle');if(document.activeElement!==c)c.value=S.title;
+  $$('[data-o]').forEach(i=>i.checked=!!S.opt[i.dataset.o]);$$('[data-opt]').forEach(c=>c.style.display=S.opt[c.dataset.opt]?'':'none');
+  $('#cPrev').value=S.previewSec;$('#cSlide').value=S.slideSec;$('#cAuto').checked=S.auto;
+  const t=$('#cTick');if(document.activeElement!==t)t.value=S.ticker.join('\n');
+  $('#thumbs').innerHTML=S.images.map((u,i)=>`<div style="background-image:url('${esc(u)}')"><button data-img="${i}" aria-label="Quitar">×</button></div>`).join('');
+  $$('#thumbs>div').forEach((d,i)=>{const im=new Image();im.onerror=()=>{d.style.borderColor='#ff5c7a';d.title='No carga';d.insertAdjacentHTML('beforeend','<span style="position:absolute;inset:0;display:grid;place-items:center;color:#ff5c7a;font:900 24px sans-serif">!</span>')};im.src=S.images[i]});
+  tickAdmin();
+}
+function tickAdmin(){
+  const rb=S.brkAt-Date.now();$('#brInfo').textContent=S.brkAt&&rb>0?'Receso en curso: faltan '+fmt(rb):'Sin receso activo.';
+  const bb=$('[data-a=black]');if(bb)bb.textContent=S.black?'⬜ Quitar negro':'⬛ Pantalla negra';
+  const r0=S.showAt-Date.now();$('#stInfo').textContent=pre0()?(r0>0?'Faltan '+fmt(r0)+' para abrir el show.':'La cuenta terminó. Pulsa Previa para el primer turno.'):'Sin cuenta regresiva programada.';
+  const p=P(),l=left(),ph={idle:'En espera',preview:'PREVIA',live:'EN VIVO'}[S.phase];
+  $('#aTime').textContent=S.phase==='idle'?'--:--':fmt(l);
+  $('#aTime').className=cls(l,S.phase);
+  $('#aWho').innerHTML=p?`<small>${ph}${S.paused?' · en pausa':''} · turno ${S.cur+1} de ${S.participants.length}</small><b>${esc(p.name)}</b> <small>${esc(p.act)}</small>`:'<small>Sin participantes</small>';
+  if(S.auto&&S.phase==='preview'&&!S.paused&&l<=0)A.live();
+}
+function initAdmin(){
+  $$('[data-a]').forEach(b=>b.onclick=()=>A[b.dataset.a]());
+  $('#aList').addEventListener('click',e=>{const b=e.target.closest('[data-b]');if(!b)return;const i=+b.closest('li').dataset.i,a=S.participants,k=b.dataset.b;
+    if(k==='go'){S.cur=i;S.phase='idle'}
+    if(k==='undo')delete a[i].st;
+    if(k==='del'){if(!confirm('¿Quitar a '+a[i].name+'?'))return;a.splice(i,1);S.cur=Math.min(S.cur,Math.max(0,a.length-1))}
+    if(k==='up'&&i>0){[a[i-1],a[i]]=[a[i],a[i-1]];if(S.cur===i)S.cur--;else if(S.cur===i-1)S.cur++}
+    if(k==='dn'&&i<a.length-1){[a[i+1],a[i]]=[a[i],a[i+1]];if(S.cur===i)S.cur++;else if(S.cur===i+1)S.cur--}
+    save()});
+  $('#aList').addEventListener('change',e=>{const f=e.target.dataset.f;if(!f)return;const p=S.participants[+e.target.closest('li').dataset.i];p[f]=f==='dur'?Math.max(1,+e.target.value||1):e.target.value;save()});
+  $('#addP').onclick=()=>{const n=$('#nName').value.trim();if(!n)return toast('Escribe un nombre');
+    S.participants.push({id:Date.now(),name:n,act:$('#nAct').value.trim(),dur:Math.max(1,+$('#nDur').value||4)});
+    $('#nName').value=$('#nAct').value='';save();$('#nName').focus()};
+  $('#nAct').onkeydown=$('#nName').onkeydown=e=>{if(e.key==='Enter')$('#addP').click()};
+  $('#cTitle').onchange=e=>{S.title=e.target.value||'Noche de Talentos';save(false)};
+  $('#cPrev').onchange=e=>{S.previewSec=Math.max(3,+e.target.value||15);save(false)};
+  $('#cSlide').onchange=e=>{S.slideSec=Math.max(3,+e.target.value||8);save(false)};
+  $('#cAuto').onchange=e=>{S.auto=e.target.checked;save(false)};
+  $('#cTick').onchange=e=>{S.ticker=e.target.value.split('\n').map(s=>s.trim()).filter(Boolean);save(false);toast('Marquesina guardada')};
+  $('#addUrl').onclick=()=>{const u=$('#imgUrl').value.trim();if(!u)return toast('Pega un enlace o ruta de imagen');
+    const im=new Image();im.onload=()=>{S.images.push(u);$('#imgUrl').value='';save();toast('Imagen añadida')};
+    im.onerror=()=>toast('No se pudo cargar. Usa un enlace directo (.jpg/.png) o sube la foto');im.src=u};
+  $('#thumbs').onclick=e=>{const b=e.target.closest('[data-img]');if(b){S.images.splice(+b.dataset.img,1);save()}};
+  $('#upBtn').onclick=()=>$('#upFile').click();
+  $('#upFile').onchange=async e=>{let n=0,bad=[];for(const f of e.target.files){try{S.images.push(await shrink(f));if(JSON.stringify(S).length>4.4e6){S.images.pop();toast('Memoria llena: usa menos fotos o súbelas al repositorio');break}n++}catch(_){bad.push(f.name)}}e.target.value='';save();if(bad.length)toast('No se pudo leer: '+bad.join(', ')+' (¿HEIC? usa JPG o PNG)');else if(n)toast(n+' foto(s) añadidas')};
+  $$('[data-in]').forEach(b=>b.onclick=()=>{S.showTotal=+b.dataset.in*60000;S.showAt=Date.now()+S.showTotal;save();toast('Cuenta regresiva iniciada')});
+  $('#stSet').onclick=()=>{const v=$('#stTime').value;if(!v)return toast('Elige una hora');const [h,m]=v.split(':'),d=new Date();d.setHours(+h,+m,0,0);
+    if(d<=Date.now())return toast('Esa hora ya pasó');S.showAt=+d;S.showTotal=d-Date.now();save();toast('Show programado')};
+  $('#stOff').onclick=()=>{S.showAt=0;save()};
+  const OPTS=[['sound','Sonidos (gong al empezar y cuenta final)'],['confetti','Confeti y “¡Un aplauso!” al terminar un turno'],['recess','Receso con cuenta regresiva'],['msg','Mensajes instantáneos en pantalla'],['black','Pantalla en negro'],['logo','Logo / patrocinadores'],['qr','QR del modo público en la pantalla'],['keys','Atajos de teclado']];
+  $('#optBox').innerHTML=OPTS.map(([k,l])=>`<label class="chk"><input type="checkbox" data-o="${k}"> ${l}</label>`).join('');
+  $('#optBox').onchange=e=>{const k=e.target.dataset.o;if(k){S.opt[k]=e.target.checked;save()}};
+  $('#brOn').onclick=()=>{S.brkTotal=Math.max(1,+$('#brMin').value||10)*60000;S.brkAt=Date.now()+S.brkTotal;save()};
+  $('#brOff').onclick=()=>{S.brkAt=0;save()};
+  $('#mGo').onclick=()=>{const t=$('#mText').value.trim();if(!t)return toast('Escribe el mensaje');S.msg={text:t,until:Date.now()+Math.max(3,+$('#mSec').value||8)*1000};save()};
+  $('#mOff').onclick=()=>{S.msg={text:'',until:0};save()};
+  $('#lgSet').onclick=()=>{const u=$('#lgUrl').value.trim();if(!u)return;const im=new Image();im.onload=()=>{S.logo=u;save();toast('Logo guardado')};im.onerror=()=>toast('No se pudo cargar esa imagen');im.src=u};
+  $('#lgUp').onclick=()=>$('#lgFile').click();
+  $('#lgFile').onchange=async e=>{try{S.logo=await shrink(e.target.files[0],500,'image/png');save();toast('Logo guardado')}catch(_){toast('No se pudo leer la imagen')}e.target.value=''};
+  $('#lgOff').onclick=()=>{S.logo='';save()};
+  $('#openPub').onclick=()=>window.open(location.pathname+'#publico','publico_talentos');
+  $('#openScreen').onclick=()=>window.open(location.pathname+'#screen','pantalla_talentos');
+  $('#reset').onclick=()=>{if(!confirm('¿Reiniciar el show? Todos vuelven a la fila.'))return;S.participants.forEach(p=>delete p.st);S.cur=0;S.phase='idle';save()};
+  $('#exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='noche-talentos.json';a.click()};
+  $('#imp').onclick=()=>$('#impFile').click();
+  $('#impFile').onchange=async e=>{try{S=Object.assign({},DEF,JSON.parse(await e.target.files[0].text()));save();toast('Show importado')}catch(_){toast('Archivo no válido')}};
+}
+function shrink(f,MX=1280,MT='image/jpeg'){return new Promise((ok,no)=>{const fr=new FileReader();fr.onerror=no;fr.onload=()=>{const im=new Image();im.onload=()=>{const r=Math.min(1,MX/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*r;c.height=im.height*r;c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL(MT,.65))};im.onerror=()=>no(new Error('formato'));im.src=fr.result};fr.readAsDataURL(f)})}
+
+/* ---- PANTALLA ---- */
+const BAD=new Set(),CHK=new Set();
+let slideI=0,slideT=null,slideKey='',tickKey='';
+function renderScreen(){
+  $('#sTitle').textContent=S.title;
+  const lg=$('#sLogo');if(S.opt.logo&&S.logo){if(lg.getAttribute('src')!==S.logo)lg.src=S.logo;lg.hidden=false}else lg.hidden=true;
+  const nxt=nextIdx();
+  $('#sList').innerHTML=S.participants.map((p,i)=>`<li class="${i===S.cur&&S.phase!=='idle'?'cur':''} ${i===nxt&&S.phase!=='idle'?'nxt':''} ${p.st?'done':''}"><b>${i+1}</b><span>${esc(p.name)}<br><small>${esc(p.act)}</small></span><small>${p.dur} min</small></li>`).join('');
+  const tk=S.ticker.join('|');if(tk!==tickKey){tickKey=tk;const t=(S.ticker.length?S.ticker:['¡Bienvenidos!']).map(m=>`<span>✦ ${esc(m)}</span>`).join('');$('#sTrack').innerHTML=t+t;$('#sTrack').style.animationDuration=Math.max(20,S.ticker.join('').length*.28)+'s'}
+  S.images.forEach(u=>{if(!CHK.has(u)){CHK.add(u);const im=new Image();im.onerror=()=>{BAD.add(u);slideKey='';renderScreen()};im.src=u}});
+  const ok=S.images.filter(u=>!BAD.has(u));
+  const items=ok.length?ok.map(u=>`url("${u}") center/cover no-repeat`):GRADS;
+  const key=items.join('~')+S.slideSec;
+  if(key!==slideKey){slideKey=key;clearInterval(slideT);const L=$$('.bgl');let k=0;
+    const show=()=>{const l=L[k%2];l.style.background=items[slideI%items.length];l.classList.remove('on');void l.offsetWidth;l.classList.add('on');L[(k+1)%2].classList.remove('on');k++;slideI++};
+    show();slideT=setInterval(show,S.slideSec*1000)}
+  tickScreen();
+}
+function nextIdx(){const n=S.participants.length;for(let k=1;k<n;k++){const i=(S.cur+k)%n;if(!S.participants[i].st)return i}return -1}
+function tickScreen(){
+  const d=new Date();$('#sClock').textContent=d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  const p=P(),l=left(),sc=$('#sc');
+  sfx(p,l);fxCheck();overlays();qrUpdate();
+  sc.classList.toggle('pre',S.phase==='preview');sc.classList.toggle('fin',allDone()&&S.phase==='idle');
+  const k=$('#sKick'),n=$('#sName'),a=$('#sAct'),t=$('#sTime'),b=$('#sBar');
+  if(S.opt.recess&&S.brkAt){const r=S.brkAt-Date.now();if(r>-6000){k.textContent='Receso';n.textContent=r>0?'Volvemos en':'¡Volvemos!';a.textContent=p?'Sigue: '+p.name+' · '+p.act:S.title;t.textContent=r>0?fmt(r):'🎤';t.className=r>0&&r<=30000?'warn':'ok';b.style.width=r>0?Math.min(100,r/(S.brkTotal||r)*100)+'%':'0';b.style.background='';return}}
+  if(pre0()){const r=S.showAt-Date.now();
+    if(r>0){k.textContent='Bienvenidos';n.textContent=S.title;a.textContent='El show comienza en';t.textContent=fmt(r);t.className=r<=10000?'crit':r<=30000?'warn':'ok';b.style.width=Math.min(100,r/(S.showTotal||r)*100)+'%';b.style.background='';return}
+    if(r>-8000){k.textContent='¡Luces, cámara!';n.textContent='¡Comienza el show!';a.textContent=S.title;t.textContent='🎤';t.className='ok';b.style.width='0';return}}
+  if(!p){k.textContent='Todo listo';n.textContent=S.title;a.textContent='Agrega participantes desde el modo admin';t.textContent='';b.style.width='0';return}
+  if(allDone()&&S.phase==='idle'){k.textContent='Fin del show';n.textContent='¡Gracias por tanto talento!';a.textContent=S.title;t.textContent='👏';b.style.width='0';return}
+  if(S.phase==='idle'){k.textContent='Muy pronto';n.textContent=p.name;a.textContent='Sigue: '+p.act;t.textContent=p.dur+' min';t.className='ok';b.style.width='0';return}
+  const pre=S.phase==='preview';
+  k.textContent=(pre?'Previa · a continuación':'En escena')+(S.paused?' · en pausa':'')+` · turno ${S.cur+1} de ${S.participants.length}`;
+  n.textContent=p.name;a.textContent=p.act;t.textContent=fmt(l);t.className=cls(l,S.phase);
+  b.style.width=Math.max(0,Math.min(100,l/S.dur*100))+'%';
+  b.style.background=pre?'':(l<0||l<=10000?'#ff4d6d':l<=30000?'#f6bd4a':'');
+}
+/* ---- extras de pantalla: sonido, confeti, mensajes, QR ---- */
+let AC=null,lastFx=-1,lastMsg=-1,qrUrl='';const PT=[];let raf=0;
+function unlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}}
+['pointerdown','keydown'].forEach(t=>addEventListener(t,()=>{if(route()==='screen')unlock()}));
+function tone(f,d,ty='sine',g=.25,t0=0){if(!AC||AC.state!=='running')return;const o=AC.createOscillator(),v=AC.createGain(),t=AC.currentTime+t0;o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,t);v.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(v);v.connect(AC.destination);o.start(t);o.stop(t+d)}
+const gong=()=>{tone(196,2.2,'sine',.35);tone(294,2,'sine',.2);tone(392,1.6,'triangle',.1)};
+const beep=()=>tone(880,.14,'square',.12), buzz=()=>tone(150,.7,'sawtooth',.2);
+function sfx(p,l){const on=S.opt.sound,run=AC&&AC.state==='running';$('#sSnd').style.display=on&&!run?'block':'none';
+  const key=S.phase+':'+(p?p.id:'');if(sfx.k===undefined){sfx.k=key;sfx.s=Math.ceil(l/1000);return}
+  if(!on||!run){sfx.k=key;return}
+  if(key!==sfx.k){sfx.k=key;sfx.s=null;if(S.phase==='live')gong()}
+  if(S.phase!=='idle'&&!S.paused){const s=Math.ceil(l/1000);if(s!==sfx.s){sfx.s=s;if(s>=1&&s<=3)beep();if(s===0&&S.phase==='live')buzz()}}}
+function fxCheck(){const f=S.fx||{t:0};if(lastFx===-1){lastFx=f.t;return}
+  if(f.t!==lastFx){lastFx=f.t;if(S.opt.confetti&&Date.now()-f.t<5000)clap(f.who)}}
+function clap(who){const c=$('#sClap');c.textContent='¡Un aplauso'+(who?' para '+who:'')+'!';c.classList.add('on');setTimeout(()=>c.classList.remove('on'),3500);tone(523,.2,'triangle',.2);tone(784,.35,'triangle',.2,.15);burst()}
+function burst(){const c=$('#fx');c.width=innerWidth;c.height=innerHeight;if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;const cols=['#f6bd4a','#c4143a','#2fd1c1','#fff3d6','#ff7aa8'];
+  for(let i=0;i<160;i++)PT.push({x:Math.random()*c.width,y:-20-Math.random()*c.height*.4,vx:(Math.random()-.5)*4,vy:2+Math.random()*5,r:5+Math.random()*7,a:Math.random()*6,va:(Math.random()-.5)*.3,c:cols[i%5]});
+  if(!raf)raf=requestAnimationFrame(draw)}
+function draw(){const c=$('#fx'),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);
+  for(const p of PT){p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()}
+  for(let i=PT.length-1;i>=0;i--)if(PT[i].y>c.height+20)PT.splice(i,1);
+  if(PT.length)raf=requestAnimationFrame(draw);else{raf=0;x.clearRect(0,0,c.width,c.height)}}
+function overlays(){const m=S.msg||{},on=!!(S.opt.msg&&m.text&&Date.now()<m.until),e=$('#sMsg');e.classList.toggle('on',on);if(on)e.textContent=m.text;
+  if(lastMsg===-1)lastMsg=m.until;else if(m.until!==lastMsg){lastMsg=m.until;if(on&&S.opt.sound){tone(660,.25,'triangle',.2);tone(880,.3,'triangle',.2,.2)}}
+  $('#sBlack').classList.toggle('on',!!(S.opt.black&&S.black))}
+function qrUpdate(){const q=$('#sQr');q.hidden=!S.opt.qr;if(!S.opt.qr)return;const u=location.href.split('#')[0]+'#publico';if(qrUrl===u)return;
+  const b=$('#sQrBox');if(typeof QRCode==='undefined'){b.textContent=u;return}
+  b.innerHTML='';new QRCode(b,{text:u,width:120,height:120,colorDark:'#14081f',colorLight:'#fff3d6'});qrUrl=u}
+/* atajos de teclado del admin */
+addEventListener('keydown',e=>{if(route()!=='admin'||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||/INPUT|TEXTAREA/.test(e.target.tagName))return;
+  const m={' ':'pause',p:'preview',l:'live',n:'done',s:'skip',b:'black',r:'brk'}[e.key.toLowerCase()];
+  if(m&&(m!=='black'||S.opt.black)&&(m!=='brk'||S.opt.recess)){e.preventDefault();A[m]()}});
+addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(b&&e.detail>0)b.blur()});
+function fullscreenKey(e){if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}}
+
+/* ---- PÚBLICO ---- */
+function renderPub(){
+  $('#pTitle').textContent=S.title;
+  const pl=$('#pLogo');if(S.opt.logo&&S.logo){if(pl.getAttribute('src')!==S.logo)pl.src=S.logo;pl.hidden=false}else pl.hidden=true;
+  $('#pList').innerHTML=S.participants.map((p,i)=>`<li class="${i===S.cur&&S.phase!=='idle'?'cur':''} ${p.st?'done':''}"><b>${i+1}</b><span>${esc(p.name)}</span><small>${esc(p.act)}</small></li>`).join('');
+  tickPub();
+}
+function tickPub(){
+  const p=P(),l=left();let k='',n='',a='',t='',c='ok';
+  if(S.opt.recess&&S.brkAt&&S.brkAt-Date.now()>0){k='Receso · volvemos en';n=S.title;t=fmt(S.brkAt-Date.now())}
+  else if(pre0()&&S.showAt-Date.now()>0){const r=S.showAt-Date.now();k='El show comienza en';n=S.title;t=fmt(r)}
+  else if(!p){k='Muy pronto';n=S.title}
+  else if(allDone()&&S.phase==='idle'){k='Fin del show';n='¡Gracias por venir!';a=S.title}
+  else if(S.phase==='idle'){k='Sigue';n=p.name;a=p.act}
+  else{k=(S.phase==='preview'?'A continuación':'En escena')+(S.paused?' · en pausa':'');n=p.name;a=p.act;t=fmt(l);c=cls(l,S.phase)}
+  $('#pKick').textContent=k;$('#pName').textContent=n;$('#pAct').textContent=a;$('#pTime').textContent=t;$('#pTime').className=c;
+  const nx=nextIdx();$('#pNext').textContent=nx>=0&&S.phase!=='idle'?'Después: '+S.participants[nx].name:'';
+  const m=S.ticker.length?S.ticker[Math.floor(Date.now()/5000)%S.ticker.length]:'';const am=S.opt.msg&&S.msg&&S.msg.text&&Date.now()<S.msg.until,mm=am?'📢 '+S.msg.text:m;$('#pNews').textContent=mm;$('#pNews').style.display=mm?'':'none';
+}
+
+/* ---- rutas ---- */
+function render(){const v=route();if(v==='admin')renderAdmin();if(v==='screen')renderScreen();if(v==='publico')renderPub()}
+function route(){const v=(location.hash||'').slice(1);const id=['admin','screen','publico'].includes(v)?v:'home';
+  $$('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+id));document.title=id==='screen'?S.title:'Noche de Talentos · Control de escenario';return id}
+addEventListener('hashchange',render);
+addEventListener('keydown',e=>{if(route()==='screen')fullscreenKey(e)});
+addEventListener('dblclick',()=>{if(route()==='screen')fullscreenKey({key:'f'})});
+initAdmin();render();
+setInterval(()=>{const v=route();if(v==='admin')tickAdmin();if(v==='screen')tickScreen();if(v==='publico')tickPub()},250);
+</script>
+</body>
+</html>
